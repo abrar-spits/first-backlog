@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marquee promo tile</title>
+<link rel="stylesheet" href="store.css">
+<style>
+  body { width: 1400px; height: 560px; position: relative; }
+  .text { position: absolute; left: 80px; top: 50%; transform: translateY(-50%); width: 460px; display: grid; gap: 20px; }
+  h1 { font-size: 58px; }
+  .frame { position: absolute; left: 610px; top: 70px; border-bottom: 0; border-radius: 14px 14px 0 0; }
+  .frame iframe { margin-top: -96px; } /* skip the breadcrumb and filter bar */
+</style>
+</head>
+<body>
+  <div class="text">
+    <span class="eyebrow"><img src="icon-art.png" alt="">First Backlog</span>
+    <h1>Your <em>Backlog</em> comes first.</h1>
+    <p class="lede">For GitLab issue boards. Backlog before Open, every list in its own color, and clearer issue cards.</p>
+  </div>
+  <div class="frame"><iframe src="board.html?col=300" width="1000" height="586" title="Board"></iframe></div>
+</body>
+</html>

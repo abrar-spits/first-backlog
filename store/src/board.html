@@ -1,0 +1,252 @@
+<!doctype html>
+<!--
+  A stand-in GitLab issue board for store screenshots, using GitLab's real board
+  markup (board_column.vue, board_list_header.vue) and made-up issues.
+  board.html          -> with the extension (loads ../../content.js)
+  board.html?before   -> GitLab's default order, no extension
+  board.html?col=N    -> lists N px wide
+  board.html?tip      -> shows the first confidential chip's tooltip
+-->
+<html lang="en" class="gl-dark">
+<head>
+<meta charset="utf-8">
+<title>Board</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #18171d;
+    color: #ececef;
+    font: 14px/1.4 -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px 0;
+    color: #a4a3a8;
+    font-size: 13px;
+  }
+  .topbar b { color: #ececef; font-weight: 600; }
+  .filters {
+    margin: 12px 20px 0;
+    padding: 9px 12px;
+    border: 1px solid #3a383f;
+    border-radius: 6px;
+    background: #1f1e24;
+    color: #89888d;
+    font-size: 13px;
+  }
+  .boards-list {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    padding: 16px 16px 0;
+    overflow: hidden;
+  }
+  .board-column { display: inline-flex; height: 100%; padding: 0 4px; position: relative; }
+  .board { width: var(--col, 340px); height: 100%; }
+  .board > div {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 0.5rem 0.5rem 0 0;
+    background: #232128;
+  }
+  .board-header { position: relative; }
+  .is-label { border-top: 4px solid; border-top-left-radius: 0.25rem; border-top-right-radius: 0.25rem; }
+  .is-label .board-title { margin-top: -0.25rem; }
+  .board-title { display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px; }
+  .caret { width: 14px; height: 14px; color: #a4a3a8; }
+  .board-title-text { flex-grow: 1; margin: 0; font-size: 14px; font-weight: 600; }
+  .gl-label { display: inline-flex; border-radius: 999px; }
+  .gl-label-text {
+    height: 20px; padding: 2px 6px; font-size: 12px; font-weight: 400; line-height: 16px;
+  }
+  .count { color: #a4a3a8; font-size: 13px; display: flex; gap: 4px; align-items: center; }
+  .board-list { list-style: none; margin: 0; padding: 4px 8px 8px; overflow: hidden; }
+
+  /* GitLab utility classes used by the card markup below. */
+  .gl-flex { display: flex; } .gl-inline-flex { display: inline-flex; } .gl-flex-col { flex-direction: column; }
+  .gl-flex-wrap { flex-wrap: wrap; } .gl-flex-wrap-reverse { flex-wrap: wrap-reverse; } .gl-flex-1 { flex: 1 1 0%; }
+  .gl-items-start { align-items: flex-start; } .gl-items-center { align-items: center; }
+  .gl-justify-between { justify-content: space-between; } .gl-justify-end { justify-content: flex-end; }
+  .gl-gap-2 { gap: 4px; } .gl-gap-3 { gap: 8px; } .gl-gap-y-2 { row-gap: 4px; }
+  .gl-p-4 { padding: 12px; } .gl-mr-6 { margin-right: 24px; } .gl-mb-3 { margin-bottom: 8px; } .gl-m-0 { margin: 0; }
+  .gl-min-h-6 { min-height: 24px; } .gl-min-w-0 { min-width: 0; } .gl-max-w-15 { max-width: 120px; } .gl-max-w-20 { max-width: 160px; }
+  .gl-overflow-hidden { overflow: hidden; } .gl-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gl-leading-20 { line-height: 20px; } .gl-text-sm { font-size: 12px; } .gl-text-base { font-size: 14px; }
+  .gl-text-subtle { color: #a4a3a8; } .gl-relative { position: relative; } .gl-absolute { position: absolute; }
+  .gl-inset-0 { inset: 0; } .gl-rounded-lg { border-radius: 0.5rem; } .gl-break-words { overflow-wrap: anywhere; }
+  .gl-whitespace-nowrap { white-space: nowrap; }
+
+  .board-card { border: 1px solid #3a383f; background: #2e2d34; line-height: 1.5; }
+  .board-card:hover { background: #34333a; }
+  .board-card.is-active { background: #233554 !important; }
+  .board-card-title { font-weight: 600; margin: 0; }
+  .board-card-title a { color: #ececef; text-decoration: none; }
+  .board-card-info, .issue-milestone-details { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; color: #a4a3a8; font: inherit; font-size: 12px; white-space: nowrap; }
+  .issue-milestone-details .milestone-title { overflow: hidden; text-overflow: ellipsis; }
+  .board-card-number { display: inline-flex; align-items: center; }
+  .ic { width: 16px; height: 16px; flex: none; }
+  .confidential { color: #d99530; margin-right: 4px; vertical-align: -2px; }
+  /* GitLab's dark-mode tooltip (BootstrapVue b-tooltip), for ?tip. */
+  :root { --gl-text-color-warning: #d99530; --gl-text-color-danger: #ec5941; }
+  .tooltip { position: absolute; z-index: 1070; display: block; font-size: 14px; line-height: 20px; }
+  .bs-tooltip-bottom { padding: 6px 0; }
+  .tooltip .arrow { position: absolute; top: 0; display: block; width: 12px; height: 6px; }
+  .tooltip .arrow::before { content: ""; position: absolute; bottom: 0; border-width: 0 6px 6px; border-style: solid; border-color: transparent transparent #3a383f; }
+  .tooltip-inner { padding: 8px 12px; border-radius: 8px; background: #3a383f; color: #ececef; text-align: center; white-space: nowrap; box-shadow: 0 4px 12px rgb(0 0 0 / 0.4); }
+  .gl-font-bold { font-weight: 600; }
+  .gl-label { display: inline-flex; border-radius: 999px; }
+  .gl-label-text { height: 20px; padding: 2px 6px; font-size: 12px; line-height: 16px; color: #fff; }
+  .board-card-assignee .user-avatar-link:not(:last-of-type) { margin-right: -8px; }
+  .gl-avatar {
+    width: 24px; height: 24px; border-radius: 50%; box-shadow: 0 0 0 1px #28272d;
+    display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #1f1e24;
+  }
+  .work-item-status { padding: 2px 10px 2px 4px; border-radius: 999px; background: #3a383f; font-size: 12px; color: #ececef; gap: 0; }
+  .work-item-status .ic { width: 12px; height: 12px; margin-right: 4px; }
+  .move-to-position { top: 8px; right: 8px; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 4px; color: #a4a3a8; }
+  .move-to-position:hover { background: #3a383f; }
+  /* ?narrow: what GitLab does when the issue drawer narrows the board (boards.scss). */
+  .narrow .board-card-assignee .gl-avatar { width: 16px; height: 16px; font-size: 7px; }
+  .narrow .board-card-info, .narrow .board-card-number { font-size: 11px; }
+</style>
+</head>
+<body>
+  <div class="topbar">Acme / Web app / <b>Issue boards</b></div>
+  <div class="filters">Search or filter results…</div>
+  <div class="boards-list" id="lists"></div>
+
+<script>
+// [title, iid, { milestone, due: [date, overdue|soon|later], estimate, labels, people, status, confidential }]
+// people are indexes into PEOPLE; status is 'todo' (default), 'doing' or false for none.
+const LISTS = [
+  { id: 1, title: 'Open', issues: [
+    ['Password reset email lands in spam', 142, { labels: [['Bug', '#dd2b0e']], people: [1] }],
+    ['Retry webhooks that time out', 138, { due: ['29 Sep', 'overdue'], people: [0] }],
+    ['Rotate the payment provider API keys', 151, { due: ['3 Oct', 'soon'], people: [3], confidential: true }],
+    ['Onboarding checklist for new teams', 127, { milestone: 'v2.4', people: [2, 4] }],
+  ] },
+  { id: 2, title: 'Backlog', color: '#000000', issues: [
+    ['Export invoices as CSV', 133, { labels: [['Feature', '#9e4fe0']] }],
+    ['Dark mode for the settings page', 119, {}],
+    ['Audit log for admin actions', 147, { people: [2], confidential: true }],
+    ['Rate limit the public API', 109, { estimate: '6h' }],
+  ] },
+  { id: 3, title: 'Ready for test', color: '#6fae63', issues: [
+    ['Upgrade to PostgreSQL 17', 136, { due: ['2 Oct', 'soon'], people: [1], status: 'doing' }],
+    ['Sign in with Microsoft for company accounts', 124, { milestone: 'v2.4', people: [0], status: 'doing' }],
+    ['Rank exact title matches first in search', 141, { labels: [['Feature', '#9e4fe0']], people: [4, 3, 1], status: 'doing' }],
+  ] },
+  { id: 5, title: 'Closed', issues: [
+    ['Set up the CI pipeline', 101, { status: false }],
+    ['Fix the flaky login test', 129, { labels: [['Bug', '#dd2b0e']], status: false }],
+    ['Upgrade Laravel to 13', 118, { status: false }],
+  ] },
+];
+// Illustrated avatars (DiceBear Notionists, CC0), made by the store scripts.
+const PEOPLE = ['sara', 'daan', 'lina', 'tom', 'noor'];
+
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const caret = '<svg class="caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6l4 4 4-4"/></svg>';
+const icon = (d) => `<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">${d}</svg>`;
+const ICONS = {
+  issue: icon('<rect x="3.5" y="2.5" width="9" height="11" rx="1.5"/>'),
+  milestone: icon('<path d="M8 2l6 6-6 6-6-6z"/>'),
+  // GitLab's gl-icon names the svg after the icon: calendar-overdue, calendar-due or calendar.
+  due: (kind) => icon('<rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/>')
+    .replace('<svg', `<svg data-testid="${{ overdue: 'calendar-overdue', soon: 'calendar-due' }[kind] || 'calendar'}-icon"`),
+  confidential: '<svg class="ic confidential gl-mr-2" data-testid="confidential-icon" viewBox="0 0 16 16" fill="currentColor"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M1.8 8s2.3-4.3 6.2-4.3S14.2 8 14.2 8s-2.3 4.3-6.2 4.3S1.8 8 1.8 8z"/><circle cx="8" cy="8" r="2"/><path stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M2.5 2.5l11 11"/></svg>',
+  estimate: icon('<path d="M4 2h8M4 14h8M5 2c0 4 6 4 6 12M11 2c0 4-6 4-6 12"/>'),
+  todo: icon('<circle cx="8" cy="8" r="5.5"/>'),
+  doing: '<svg class="ic" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 4a4 4 0 0 1 0 8z" fill="currentColor"/></svg>',
+  more: '<svg class="ic" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3.5" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="8" cy="12.5" r="1.3"/></svg>',
+};
+
+function card([name, iid, meta], listIndex, i, closed, active) {
+  const people = (meta.people || []).map((k) => PEOPLE[k]);
+  const labels = (meta.labels || []).map(([text, bg]) =>
+    `<span class="gl-label" style="background:${bg}"><span class="gl-label-text">${esc(text)}</span></span>`).join('');
+  return `<li class="board-card gl-relative gl-mb-3 gl-rounded-lg${active ? ' is-active' : ''}" data-item-id="gid://gitlab/Issue/${iid}" data-item-iid="${iid}" data-item-path="acme/web-app#${iid}">
+    <div>
+      <a class="board-card-button gl-absolute gl-inset-0 gl-rounded-lg" href="#"></a>
+      <div class="gl-flex gl-flex-col gl-gap-3 gl-p-4">
+        <div class="gl-flex" dir="auto">
+          <h3 class="board-card-title gl-min-w-0 gl-break-words gl-text-base${closed ? '' : ' gl-mr-6'}">${meta.confidential ? ICONS.confidential : ''}<a href="#" title="${esc(name)}"><span>${esc(name)}</span></a></h3>
+          ${closed ? '<!---->' : `<div class="move-to-position gl-absolute">${ICONS.more}</div>`}
+        </div>
+        ${labels ? `<div class="board-card-labels gl-flex gl-flex-wrap gl-gap-2">${labels}</div>` : '<!---->'}
+        <div class="board-card-footer gl-flex gl-flex-wrap gl-items-start gl-justify-between gl-gap-y-2">
+          <div class="board-card-number-container gl-flex gl-flex-wrap-reverse gl-items-center gl-overflow-hidden${people.length ? ' gl-min-h-6' : ''}">
+            <div class="board-info-items gl-flex gl-flex-wrap gl-gap-3 gl-gap-y-2 gl-leading-20">
+              <span class="board-card-number gl-gap-2 gl-overflow-hidden gl-text-sm gl-text-subtle">${ICONS.issue}<span>#${iid}</span></span>
+              ${meta.milestone ? `<button class="issue-milestone-details gl-flex gl-max-w-15 gl-gap-2 gl-items-center gl-text-subtle">${ICONS.milestone}<span class="milestone-title gl-truncate">${esc(meta.milestone)}</span></button>` : '<!---->'}
+              ${meta.due ? `<button class="board-card-info gl-text-subtle">${ICONS.due(meta.due[1])}<time class="board-card-info-text gl-text-sm">${meta.due[0]}</time></button>` : '<!---->'}
+              ${meta.estimate ? `<button class="board-card-info board-card-weight gl-text-sm gl-text-subtle">${ICONS.estimate}<time class="board-card-info-text gl-text-sm">${meta.estimate}</time></button>` : '<!---->'}
+            </div>
+          </div>
+          <div class="gl-flex gl-flex-1 gl-flex-wrap gl-items-center gl-justify-end gl-gap-3">
+            <div class="board-card-assignee gl-flex">${people.map((name) =>
+              `<a class="user-avatar-link"><img class="gl-avatar" src="avatars/${name}.svg" alt=""></a>`).join('')}</div>
+            <!---->
+            <div class="gl-max-w-20">${meta.status === false ? '<!---->' :
+              `<div class="work-item-status gl-inline-flex gl-items-center">${ICONS[meta.status || 'todo']}<div class="gl-min-w-0 gl-overflow-hidden">${meta.status === 'doing' ? 'In progress' : 'To do'}</div></div>`}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </li>`;
+}
+
+const params = new URLSearchParams(location.search);
+document.getElementById('lists').innerHTML = LISTS.map((list, listIndex) => {
+  const title = list.color
+    ? `<span class="gl-label" style="background:${list.color}"><span class="gl-label-text" style="color:${list.text || '#fff'}">${esc(list.title)}</span></span>`
+    : `<span class="board-title-main-text">${esc(list.title)}</span>`;
+  const closed = list.title === 'Closed';
+  const cards = list.issues.map((issue, i) => card(issue, listIndex, i, closed, params.has('active') ? i === 1 : list.id === 1 && i === 1)).join('');
+  const id = `gid://gitlab/List/${list.id}`;
+  return `<div class="board-column" data-list-id="${id}"><div class="board"><div>
+    <header class="board-header${list.color ? ' is-label' : ''}" ${list.color ? `style="border-top-color:${list.color}"` : ''}>
+      <div class="board-title">${caret}<h2 class="board-title-text">${title}</h2><span class="count">${list.issues.length}</span></div>
+    </header>
+    <ul class="board-list" data-list-id="${id}">${cards}</ul>
+  </div></div></div>`;
+}).join('');
+
+if (params.has('narrow')) document.body.classList.add('narrow');
+if (params.has('col')) document.documentElement.style.setProperty('--col', params.get('col') + 'px');
+
+if (!params.has('before')) {
+  // Stand-in for chrome.storage, so the real content script runs on this page.
+  const stored = { redesign: !params.has('plain') };
+  window.chrome = {
+    storage: {
+      sync: { get: (defaults, cb) => setTimeout(() => cb({ ...defaults, ...stored })), set: (v, cb) => cb && cb() },
+      onChanged: { addListener() {} },
+    },
+  };
+  try { localStorage.clear(); } catch {}
+  for (const src of ['../../settings.js', '../../corners.js', '../../content.js']) {
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = false;
+    document.body.appendChild(s);
+  }
+  // content.js runs as a plain script here, so its functions are globals.
+  if (params.has('tip')) {
+    setTimeout(() => {
+      const chip = document.querySelector('.fb-confidential');
+      if (chip) showConfidentialTip(chip);
+    }, 800);
+  }
+}
+</script>
+</body>
+</html>

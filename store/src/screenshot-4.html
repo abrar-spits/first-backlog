@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screenshot 4</title>
+<link rel="stylesheet" href="store.css">
+<style>
+  body { width: 1280px; height: 800px; position: relative; }
+  .text { position: absolute; left: 64px; top: 50%; transform: translateY(-50%); width: 470px; display: grid; gap: 22px; }
+  ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 14px; font-size: 17px; }
+  li { display: flex; gap: 12px; align-items: baseline; color: var(--text); }
+  li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); transform: translateY(-2px); }
+  .board { position: absolute; left: 600px; top: 70px; opacity: 0.55; }
+  .popup {
+    position: absolute; left: 700px; top: 190px;
+    border-radius: 12px;
+    transform: scale(1.35); transform-origin: top left;
+  }
+  .popup iframe { border-radius: 12px; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <span class="eyebrow"><img src="icon-art.png" alt="">First Backlog</span>
+    <h1>Tune it in <em>one click.</em></h1>
+    <ul>
+      <li>Turn the whole extension on or off</li>
+      <li>Keep only the Backlog order, or the full redesign</li>
+      <li>Show or hide the copy-title chip</li>
+      <li>Changes apply to open boards right away</li>
+    </ul>
+  </div>
+  <div class="frame board"><iframe src="board.html" width="760" height="660" title="Board"></iframe></div>
+  <div class="frame popup"><iframe src="build/popup-preview.html" width="300" height="300" title="Settings"></iframe></div>
+</body>
+</html>

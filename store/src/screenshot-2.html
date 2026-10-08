@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screenshot 2</title>
+<link rel="stylesheet" href="store.css">
+<style>
+  body { width: 1280px; height: 800px; padding: 52px 50px; }
+  header { display: grid; gap: 12px; margin-bottom: 30px; }
+  .rows { display: grid; gap: 26px; }
+  .row { display: grid; gap: 10px; }
+  .row iframe { margin-top: -96px; } /* skip the board's breadcrumb and filter bar */
+  .frame { height: 250px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>GitLab keeps Open first. <em>Now you choose.</em></h1>
+  </header>
+  <div class="rows">
+    <div class="row">
+      <span><span class="tag">GitLab default</span></span>
+      <div class="frame"><iframe src="board.html?before" width="1180" height="346" title="Default board"></iframe></div>
+    </div>
+    <div class="row">
+      <span><span class="tag on">With First Backlog</span></span>
+      <div class="frame"><iframe src="board.html" width="1180" height="346" title="Board with First Backlog"></iframe></div>
+    </div>
+  </div>
+</body>
+</html>

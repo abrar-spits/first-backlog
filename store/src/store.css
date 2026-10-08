@@ -1,0 +1,68 @@
+/* Shared look for the store images: the icon's indigo, orange and violet. */
+:root {
+  --indigo: #312a63;
+  --indigo-deep: #1c1838;
+  --orange: #fca130;
+  --violet: #b4acec;
+  --text: #f4f2ff;
+  --muted: #c3bee6;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  overflow: hidden;
+  color: var(--text);
+  font-family: -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  background-color: var(--indigo-deep);
+  background-image: linear-gradient(160deg, var(--indigo), var(--indigo-deep));
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.eyebrow img { width: 28px; height: 28px; }
+
+h1 {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+h1 em { font-style: normal; color: var(--orange); }
+
+.lede { margin: 0; color: var(--muted); font-size: 19px; line-height: 1.45; }
+
+/* A browser-ish frame around a live board. */
+.frame {
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 14px;
+  background: #18171d;
+  box-shadow: 0 30px 80px rgb(8 6 24 / 0.55), 0 2px 0 rgb(255 255 255 / 0.04) inset;
+}
+
+.frame iframe { display: block; border: 0; }
+
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tag.on { background: var(--orange); color: #2a1d05; }

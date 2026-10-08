@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screenshot 3</title>
+<link rel="stylesheet" href="store.css">
+<style>
+  body { width: 1280px; height: 800px; position: relative; }
+  .text { position: absolute; left: 64px; top: 50%; transform: translateY(-50%); width: 440px; display: grid; gap: 22px; }
+  ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 14px; font-size: 17px; }
+  li { display: flex; gap: 12px; align-items: baseline; color: var(--text); }
+  li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); transform: translateY(-2px); }
+  /* One list, zoomed: the Open list, with the confidential chip's tooltip. */
+  .frame { position: absolute; left: 620px; top: 60px; width: 540px; height: 740px; border-bottom: 0; border-radius: 14px 14px 0 0; }
+  .frame iframe { transform: scale(1.5); transform-origin: 0 0; margin: -144px 0 0 -540px; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <span class="eyebrow"><img src="icon-art.png" alt="">First Backlog</span>
+    <h1>Cards that read <em>at a glance.</em></h1>
+    <ul>
+      <li>Overdue dates turn red, dates due soon amber</li>
+      <li>Confidential issues get their own chip</li>
+      <li>Copy “#33 | Title” in one click</li>
+      <li>Cards keep their size when the issue panel opens</li>
+    </ul>
+  </div>
+  <div class="frame"><iframe src="board.html?tip" width="1180" height="620" title="Issue cards"></iframe></div>
+</body>
+</html>

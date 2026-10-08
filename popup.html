@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>First Backlog</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="head">
+    <img src="icons/icon48.png" alt="" width="28" height="28">
+    <div>
+      <h1>First Backlog</h1>
+      <p>GitLab issue boards</p>
+    </div>
+  </header>
+
+  <label class="row row-main">
+    <span class="text">
+      <span class="title">Enabled</span>
+      <span class="hint">Backlog first, and the options below</span>
+    </span>
+    <input type="checkbox" class="switch" data-setting="enabled">
+  </label>
+
+  <section class="group">
+    <label class="row">
+      <span class="text">
+        <span class="title">Redesign</span>
+        <span class="hint">Colored lists, tidier issue cards and softer labels</span>
+      </span>
+      <input type="checkbox" class="switch" data-setting="redesign">
+    </label>
+    <label class="row">
+      <span class="text">
+        <span class="title">Copy title</span>
+        <span class="hint">A chip on each card that copies “#33 | Title”</span>
+      </span>
+      <input type="checkbox" class="switch" data-setting="titleCopy">
+    </label>
+  </section>
+
+  <footer>Changes apply to open boards right away.</footer>
+
+  <script src="settings.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
